@@ -13,8 +13,8 @@ from google.protobuf.struct_pb2 import Struct
 from google.protobuf import json_format
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/home/vision/YuriWorkspace/SocialRobot_IntentionClassification/authkey/socialrobot-hyu-xdtlug-eb5be21aa398.json"  # homecare
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/home/vision/YuriWorkspace/SocialRobot_IntentionClassification/authkey/socialrobot-hyu-reception-nyla-176b1cd7164b.json"  # reception
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "add homecare dialogflow authkey path"  # homecare
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "add reception dialogflow authkey path"  # reception
 data_path = 'data/data_noHAN_kkma_190907_train.pkl'
 
 '''
