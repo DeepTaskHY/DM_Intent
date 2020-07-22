@@ -2,7 +2,7 @@
 
 ## 2. package summary 
 
-Intention Classifier is a module that analyzes the intention of the user’s utterance.  
+Intention Classifier is a module that analyzes the intention of the user’s utterance. This module modifies and combines “bi-RNN” and “Attention mechanism” to implement an Intention classification model. 
 
 - 2.1 Maintainer status: maintained
 - 2.2 Maintainer: Yuri Kim, [yurikim@hanyang.ac.kr]()
@@ -12,9 +12,7 @@ Intention Classifier is a module that analyzes the intention of the user’s utt
 
 ## 3. Overview
 
-This module modifies and combines “bi-RNN” and “Attention mechanism” to implement an Intention classification model. 
-
-(여기 작성 및 구조도 추가하기)
+To analyze the intention of the user's utterance, this module consists of two parts: 1)keyword extraction, 2)intention analysis. To extract the keywords of the user's utterance, we used Google Dialogflow. This module combines “bi-RNN” and “Attention mechanism” to implement an Intention classification model. 
 
 ## 4. Hardware requirements
 
@@ -53,7 +51,9 @@ Install Tensorflow-gpu
 
 ### 5.2 Start the module
 
-(여기 작성해야해 ~~~)
+```
+$ python3 DMIntent.py
+```
 
 ## 6. Input/Subscribed Topics
 
@@ -144,6 +144,11 @@ There are one category of parameters that can be used to configure the module: d
 
 ## 9. Related Applications (Optional)
 
+None
+
 ## 10. Related Publications (Optional)
 
-(제출 전에 논문 리스트 추가해)
+- Wang, Y., Huang, M., & Zhao, L. Attentionbased lstm for aspect-level sentiment classification.In Proceedings of the 2016 conference on empiricalmethods in natural language processing. 606-615, 2016
+- Mikolov, T., Chen, K., Corrado, G., & Dean, J. Efficient estimation of word representations in vector space. arXiv:1301.3781. Retrieved from https://arxiv.org/abs/1301.3781 , 2013 
+- Zhou, P., Shi, W., Tian, J., Qi, Z., Li, B., Hao, H., & Xu, B. Attention-based bidirectional long shortterm memory networks for relation classification. In Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics, 2. 207-212, 2016
+- Jeongmin Yoon and Youngjoong Ko. Speech-Act Analysis System Based on Dialogue Level RNNCNN Effective on the Exposure Bias Problem. Journal of KIISE, 45, 9 (2018), 911-917, 2018
