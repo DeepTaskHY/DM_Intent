@@ -20,17 +20,16 @@ None
 
 ## 5. Quick start
 
-### 5.1 Install dependency:
+### 5.1 Install dependency
 
-**tensorflow-gpu** 
-Install CUDA  
+**CUDA**  
 
     $ sudo dpkg -i cuda-repo-ubuntu1604_10.0.130-1_amd64.deb  
     $ sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub  
     $ sudo apt-get update  
     $ sudo apt-get install cuda  
 
-Install cuDNN
+**cuDNN**
 
     $ tar xvfz cudnn-10.0-linux-x64-v7.6.1.34.tgz  
     $ sudo cp -P cuda/include/cudnn.h /usr/local/cuda/include  
@@ -43,7 +42,7 @@ Install cuDNN
     export CUDA_HOME=/usr/local/cuda  
     $ nvcc --version  
 
-Install Tensorflow-gpu  
+**Tensorflow-gpu**  
 
     $ sudo apt-get install python3-pip python3-dev  
     $ pip3 install tensorflow-gpu  
@@ -65,8 +64,7 @@ $ python3 DMIntent.py
       "target":["planning"],
       "timestamp":"1544471289.409"
    },
-   "dialog_intent":{  
-      "intent":"인사",
+   "dialog_intent":{ 
       "speech":"안녕하세요",
       "name":"이병현",
       "information":{  
@@ -85,10 +83,11 @@ $ python3 DMIntent.py
 - target: receive module name  
 - content: role of this ROS topic name  
 
-○ human_speech (human_speech/recognitionResult): contain human speech and user name.  
+○ dialog_intent (dialog_intent/recognitionResult): contain human speech and user name.  
 
 - speech: human speech    
-- name: user name  
+- name: user name   
+- information: keyword to use for intention classification 
 
 ## 7. Output/Published Topics
 
@@ -121,7 +120,6 @@ $ python3 DMIntent.py
 - intent: intention of the human speech  
 - speech: human speech  
 - name: user name  
-- information: keyword to use for intention classification  
 
 ## 8. Parameters
 
