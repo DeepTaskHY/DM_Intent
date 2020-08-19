@@ -22,23 +22,31 @@ None
 
 ### 5.1 Install dependency
 
+**ros-melodic**
+
 ```
-$ git clone --recursive https://github.com/DeepTaskHY/DM_Intent.git
-$ sudo pip3 install --upgrade pip3 setuptools
-$ sudo pip3 install --upgrade pyasn1
-$ sudo apt-get install python3-pyyaml
-$ sudo apt-get install python3-tk
+$ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+$ sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+$ sudo apt-get update  
+$ sudo apt-get install ros-melodic-desktop-full  
+$ sudo rosdep init  
+$ rosdep update  
 ```
 
 **requirements**
 
 ```
+$ git clone --recursive https://github.com/DeepTaskHY/DM_Intent.git
+$ sudo apt-get update && sudo apt-get install python3-pip 
+$ sudo apt-get install default-jdk
+$ sudo apt-get install default-jre
+$ sudo apt-get install python3-pyyaml
 $ sudo pip3 install -r requirements.txt
 ```
 
 **download files**
 
-Go to [Author's Google drive](https://drive.google.com/file/d/1vnw4xdcRvk8dqU9MOiRWAF-pqNNhRtsd/view?usp=sharing) and download the trained model, data, and auth key. 
+Go to [Author's Google drive](https://drive.google.com/file/d/1vnw4xdcRvk8dqU9MOiRWAF-pqNNhRtsd/view?usp=sharing) and download the trained model, data, and auth-key. 
 
 ```
 dm_intent 
