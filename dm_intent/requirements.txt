@@ -18,7 +18,7 @@ chardet==3.0.4
 colorama==0.4.3
 controller-manager==0.18.1
 controller-manager-msgs==0.18.1
-cryptography==2.1.4
+cryptography==2.3
 cv-bridge==1.13.0
 cycler==0.10.0
 diagnostic-analysis==1.9.3
