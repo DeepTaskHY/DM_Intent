@@ -41,6 +41,8 @@ $ sudo apt-get update && sudo apt-get install python3-pip
 $ sudo apt-get install default-jdk
 $ sudo apt-get install default-jre
 $ sudo apt-get install python3-pyyaml
+
+$ cd dm_intent
 $ sudo pip3 install -r requirements.txt
 ```
 
