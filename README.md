@@ -22,36 +22,36 @@ None
 
 ### 5.1 Install dependency
 
-**CUDA**  
+```
+$ git clone --recursive https://github.com/DeepTaskHY/DM_Intent.git
+$ sudo pip3 install --upgrade pip3 setuptools
+$ sudo pip3 install --upgrade pyasn1
+$ sudo apt-get install python3-pyyaml
+$ sudo apt-get install python3-tk
+```
 
-    $ sudo dpkg -i cuda-repo-ubuntu1604_10.0.130-1_amd64.deb  
-    $ sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub  
-    $ sudo apt-get update  
-    $ sudo apt-get install cuda  
+**requirements**
 
-**cuDNN**
+```
+$ sudo pip3 install -r requirements.txt
+```
 
-    $ tar xvfz cudnn-10.0-linux-x64-v7.6.1.34.tgz  
-    $ sudo cp -P cuda/include/cudnn.h /usr/local/cuda/include  
-    $ sudo cp -P cuda/lib64/libcudnn* /usr/local/cuda/lib64  
-    $ sudo chmod a+r /usr/local/cuda/include/cudnn.h /usr/local/cuda/lib64/libcudnn*  
-    $ sudo apt-get install libcupti-dev  
-    vi ~/.bashrc export  
-    PATH=/usr/local/cuda/bin:$PATH  
-    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64"  
-    export CUDA_HOME=/usr/local/cuda  
-    $ nvcc --version  
+**download files**
 
-**Tensorflow-gpu**  
+Go to [Author's Google drive](https://drive.google.com/file/d/1vnw4xdcRvk8dqU9MOiRWAF-pqNNhRtsd/view?usp=sharing) and download the trained model, data, and auth key. 
 
-    $ sudo apt-get install python3-pip python3-dev  
-    $ pip3 install tensorflow-gpu  
-    $ python3 -c "import tensorflow as tf; print(tf.__version__)"  
+```
+dm_intent 
+	ㄴauthkey
+	ㄴbirnn_GRU_0.001_192_ENSEMBLE9
+	ㄴdata
+```
 
 ### 5.2 Start the module
 
 ```
-$ python3 DMIntent.py
+$ cd dm_intent/
+$ roslaunch launch/dm_intent.launch
 ```
 
 ## 6. Input/Subscribed Topics
