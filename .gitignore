@@ -1,0 +1,6 @@
+dm_intent/scripts/authkey/*
+dm_intent/scripts/birnn_GRU_0.001_192_ENSEMBLE9/*
+dm_intent/scripts/data/*
+*~
+.idea
+venv/
