@@ -20,8 +20,8 @@ import json
 
 import sys
 print(sys.executable)
-import rospkg
 
+version = "homecare" # set homecare / reception
 PACK_PATH = rospkg.RosPack().get_path("dm_intent")
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -153,11 +153,7 @@ def ros_callback_fn(msg):
             config.gpu_options.allow_growth = True
 
             models = os.listdir(PACK_PATH + '/scripts/birnn_GRU_0.001_192_ENSEMBLE9/')
-            # print(models)
-            #probabilities = np.array([[0., 0.] for i in range(len(testSamples))])
             probabilities = []
-            # print('model', model, 'check....')
-            # model_path = '/birnn_GRU_0.001_192_ENSEMBLE9/' + model + '/best_val'
             model = models.__getitem__(0)
             model_path = PACK_PATH + '/scripts/birnn_GRU_0.001_192_ENSEMBLE9/best_val'
             tf.reset_default_graph()
@@ -184,21 +180,19 @@ def ros_callback_fn(msg):
 
                 idlist_probability = sess.run(tf.nn.softmax(model.logits), feed_dict=feed_dict)
                 probabilities.append(idlist_probability)
-                # print("### probabilities ", probabilities)
-                # print("### idlist_probability ", idlist_probability)
 
                 del model
                 gc.collect()
 
             all_predictions = int(np.argmax(probabilities))
             print(all_predictions)
-            # info = detect_intent_texts('socialrobot-hyu-xdtlug', 'hyusocialdmgenerator', [data], 'ko')  # homecare ko
-            info = detect_intent_texts('socialrobot-hyu-reception-nyla', 'hyusocialintent', [data], 'ko')  # reception ko
+            if version == "homecare":
+                info = detect_intent_texts('socialrobot-hyu-xdtlug', 'hyusocialdmgenerator', [data], 'ko')  # homecare ko
+            else:
+                info = detect_intent_texts('socialrobot-hyu-reception-nyla', 'hyusocialintent', [data], 'ko')  # reception ko
             # print("intent: ", all_predictions, ' type: ', type(all_predictions))
 
             final = make_response_json(all_predictions, data, info)
-            # final = make_response_json(all_predictions, data, info)
-
             info = None
 
             # ROS  
@@ -206,8 +200,6 @@ def ros_callback_fn(msg):
 
             print('*'*100)
             print(final)
-
-            # print_for_check(" Output", final)
             print("="*100)
 
 
