@@ -20,11 +20,18 @@ import json
 
 import sys
 print(sys.executable)
+import rospkg
 
+PACK_PATH = rospkg.RosPack().get_path("dm_intent")
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./authkey/socialrobot-hyu-xdtlug-eb5be21aa398.json"  # homecare
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./authkey/socialrobot-hyu-reception-nyla-a093501276ce.json"  # reception
-data_path = "/workspace/dm_ws/src/dm_intent/scripts/data/data_noHAN_kkma_190907_train.pkl"
+
+AUTH_KEY_HOMECARE_PATH = PACK_PATH + "/scripts/authkey/socialrobot-hyu-xdtlug-7fe2505e00b7.json"
+AUTH_KEY_RECEPTION_PATH = PACK_PATH + "/scripts/authkey/socialrobot-hyu-reception-nyla-a093501276ce.json"
+
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = AUTH_KEY_HOMECARE_PATH
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = AUTH_KEY_RECEPTION_PATH
+data_path = PACK_PATH + "/scripts/data/data_noHAN_kkma_190907_train.pkl"
+
 
 '''
     Social Robot HYU
@@ -127,15 +134,16 @@ def ros_callback_fn(msg):
     if msg.data != '':
         # convert ros message to json
         ros_input = json.loads(msg.data, encoding='utf-8')
+        #print(ros_input)
 
         if "dialog" == ros_input['header']['target'][0]:
-            # print_for_check(" Input ", ros_input)
+            print(" Input ", ros_input)
 
-            name = ros_input['dialog_generation']['name']
-            intent = ros_input['dialog_generation']['intent']
-            human_speech = ros_input['dialog_generation']['human_speech']
-            id = ros_input['dialog_generation']['id']
-            social_context = ros_input['dialog_generation']['social_context']
+            name = ros_input['human_speech']['name']
+            # intent = ros_input['dialog_generation']['intent']
+            human_speech = ros_input['human_speech']['speech']
+            # id = ros_input['human_speech']['id']
+            # social_context = ros_input['dialog_generation']['social_context']
 
             # input test
             data = human_speech
@@ -144,13 +152,14 @@ def ros_callback_fn(msg):
             config = tf.ConfigProto()
             config.gpu_options.allow_growth = True
 
-            models = os.listdir('./birnn_GRU_0.001_192_ENSEMBLE9/')
+            models = os.listdir(PACK_PATH + '/scripts/birnn_GRU_0.001_192_ENSEMBLE9/')
+            # print(models)
             #probabilities = np.array([[0., 0.] for i in range(len(testSamples))])
             probabilities = []
             # print('model', model, 'check....')
             # model_path = '/birnn_GRU_0.001_192_ENSEMBLE9/' + model + '/best_val'
             model = models.__getitem__(0)
-            model_path = './birnn_GRU_0.001_192_ENSEMBLE9/best_val'
+            model_path = PACK_PATH + '/scripts/birnn_GRU_0.001_192_ENSEMBLE9/best_val'
             tf.reset_default_graph()
             with tf.Session(config=config) as sess:
                 model = Model(rnn_size=RNN_SIZE, vocabulary_size=VOCABULARY_SIZE, sequence_len=SEQ_LEN, embedding_size=EMBEDDING_SIZE, attention_size=ATTENTION_SIZE, learning_rate=LEARNING_RATE, l2_reg_lambda=L2_LEG_LAMBDA, n_label=N_LABEL, index_front=INDEX_FRONT, index_back=INDEX_BACK, rnn_cell=RNN_CELL)
@@ -182,15 +191,17 @@ def ros_callback_fn(msg):
                 gc.collect()
 
             all_predictions = int(np.argmax(probabilities))
-
+            print(all_predictions)
             # info = detect_intent_texts('socialrobot-hyu-xdtlug', 'hyusocialdmgenerator', [data], 'ko')  # homecare ko
             info = detect_intent_texts('socialrobot-hyu-reception-nyla', 'hyusocialintent', [data], 'ko')  # reception ko
             # print("intent: ", all_predictions, ' type: ', type(all_predictions))
+
             final = make_response_json(all_predictions, data, info)
+            # final = make_response_json(all_predictions, data, info)
+
             info = None
 
             # ROS  
-            task_completion_pub = rospy.Publisher('/dialog_intent', String, queue_size=10)
             task_completion_pub.publish(json.dumps(final, ensure_ascii=False, indent=4))
 
             print('*'*100)
@@ -201,8 +212,11 @@ def ros_callback_fn(msg):
 
 
 def run_subscriber():
+    global task_completion_pub
     rospy.init_node('HYU_DM_Intention_Classification')
-    rospy.Subscriber('/taskExecution', String, ros_callback_fn)
+    task_completion_pub = rospy.Publisher('/dialog_intent', String, queue_size=10)
+    rospy.Subscriber('/recognitionResult', String, ros_callback_fn)
+
     rospy.spin()
 
 
