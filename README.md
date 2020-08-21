@@ -48,7 +48,7 @@ $ sudo pip3 install -r requirements.txt
 
 **download files**
 
-Go to [Author's Google drive](https://drive.google.com/file/d/1vnw4xdcRvk8dqU9MOiRWAF-pqNNhRtsd/view?usp=sharing) and download the trained model, data, and auth-key. 
+Go to [Author's Google drive](https://drive.google.com/file/d/1397UDfHetBVBrTLzASouVDaJfdhFgxvp/view?usp=sharing) and download the trained model, data, and auth-key. 
 
 ```
 dm_intent 
