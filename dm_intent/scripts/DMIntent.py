@@ -20,18 +20,27 @@ import json
 
 import sys
 print(sys.executable)
+import rospkg
 
-version = "homecare" # set homecare / reception
+version = "reception"  # set homecare / reception
 PACK_PATH = rospkg.RosPack().get_path("dm_intent")
+print('pack_path: ', PACK_PATH)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-AUTH_KEY_HOMECARE_PATH = PACK_PATH + "/scripts/authkey/socialrobot-hyu-xdtlug-7fe2505e00b7.json"
-AUTH_KEY_RECEPTION_PATH = PACK_PATH + "/scripts/authkey/socialrobot-hyu-reception-nyla-a093501276ce.json"
+AUTH_KEY_HOMECARE_PATH = PACK_PATH + "/scripts/authkey/homcare.json"
+AUTH_KEY_RECEPTION_PATH = PACK_PATH + "/scripts/authkey/reception.json"
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = AUTH_KEY_HOMECARE_PATH
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = AUTH_KEY_RECEPTION_PATH
-data_path = PACK_PATH + "/scripts/data/data_noHAN_kkma_190907_train.pkl"
+if version == "homecare":
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = AUTH_KEY_HOMECARE_PATH
+else:
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = AUTH_KEY_RECEPTION_PATH
 
+data_path = PACK_PATH + "/scripts/data/data.pkl"
+dir_path = os.path.dirname(os.path.abspath(__file__))
+print('dir_path: ', dir_path)
+models = os.listdir(PACK_PATH + '/scripts/checkpoints/')
+model_path = dir_path + '/checkpoints'
+model_checkpoint_path = model_path + '/model.ckpt-25'
 
 '''
     Social Robot HYU
@@ -76,14 +85,8 @@ def detect_intent_texts(project_id, session_id, texts, language_code):
 
         print('=' * 20)
         print('Query text: {}'.format(response.query_result.query_text))
-        # print('Detected intent: {} (confidence: {})\n'.format(
-        #     response.query_result.intent.display_name,
-        #     response.query_result.intent_detection_confidence))
-        # print('Parameters text: {}\n'.format(response.query_result.parameters))
-        # print('Parameters text type: \n', type(response.query_result.parameters))
 
         entities = response.query_result.parameters
-        # print('entities type : ', type(entities))
         entities_dic = json_format.MessageToDict(entities)
         return entities_dic
 
@@ -129,88 +132,53 @@ INDEX_BACK = VOCABULARY_SIZE - INDEX_FRONT
 RNN_CELL = 'GRU'
 MODEL = 'birnn'
 
+while (True):
 
-def ros_callback_fn(msg):
-    if msg.data != '':
-        # convert ros message to json
-        ros_input = json.loads(msg.data, encoding='utf-8')
-        #print(ros_input)
+    # input test
+    data = input('input text...')
 
-        if "dialog" == ros_input['header']['target'][0]:
-            print(" Input ", ros_input)
+    AdaboostInfoLocation = './data/AdaboostInfo.pkl'
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
 
-            name = ros_input['human_speech']['name']
-            # intent = ros_input['dialog_generation']['intent']
-            human_speech = ros_input['human_speech']['speech']
-            # id = ros_input['human_speech']['id']
-            # social_context = ros_input['dialog_generation']['social_context']
+    probabilities = []
+    model = models.__getitem__(0)
+    print('model_path: ', model)
+    tf.reset_default_graph()
+    with tf.Session(config=config) as sess:
+        model = Model(rnn_size=RNN_SIZE, vocabulary_size=VOCABULARY_SIZE, sequence_len=SEQ_LEN,
+                      embedding_size=EMBEDDING_SIZE, attention_size=ATTENTION_SIZE, learning_rate=LEARNING_RATE,
+                      l2_reg_lambda=L2_LEG_LAMBDA, n_label=N_LABEL, index_front=INDEX_FRONT, index_back=INDEX_BACK,
+                      rnn_cell=RNN_CELL)
+        # ckpt = tf.train.get_checkpoint_state(model_path)
+        if tf.train.checkpoint_exists(model_checkpoint_path):
+            model.saver.restore(sess, model_checkpoint_path)
+        else:
+            raise ValueError('No such file:[{}]'.format(model_path))
 
-            # input test
-            data = human_speech
+        idlist, sentence_length = make_embedding_from_input(data, word2id)
 
-            AdaboostInfoLocation = './data/AdaboostInfo_intent_ensemble_noJosaEomi_th5to2500_boost_30_181211_porting.pkl'
-            config = tf.ConfigProto()
-            config.gpu_options.allow_growth = True
+        # source = list(sample[0])
+        pad = [0] * (SEQ_LEN - len(idlist))
+        idlist = [idlist + pad]
 
-            models = os.listdir(PACK_PATH + '/scripts/birnn_GRU_0.001_192_ENSEMBLE9/')
-            probabilities = []
-            model = models.__getitem__(0)
-            model_path = PACK_PATH + '/scripts/birnn_GRU_0.001_192_ENSEMBLE9/best_val'
-            tf.reset_default_graph()
-            with tf.Session(config=config) as sess:
-                model = Model(rnn_size=RNN_SIZE, vocabulary_size=VOCABULARY_SIZE, sequence_len=SEQ_LEN, embedding_size=EMBEDDING_SIZE, attention_size=ATTENTION_SIZE, learning_rate=LEARNING_RATE, l2_reg_lambda=L2_LEG_LAMBDA, n_label=N_LABEL, index_front=INDEX_FRONT, index_back=INDEX_BACK, rnn_cell=RNN_CELL)
-                ckpt = tf.train.get_checkpoint_state(model_path)
-                if ckpt and tf.train.checkpoint_exists(ckpt.model_checkpoint_path):
-                    model.saver.restore(sess, ckpt.model_checkpoint_path)
-                else:
-                    raise ValueError('No such file:[{}]'.format(model_path))
+        feed_dict = {model.inputs: idlist,
+                     model.inputs_length: [1],
+                     model.targets: [0],
+                     model.dropout_keep_prob: 1.0}
 
-                idlist, sentence_length = make_embedding_from_input(data, word2id)
+        idlist_probability = sess.run(tf.nn.softmax(model.logits), feed_dict=feed_dict)
+        probabilities.append(idlist_probability)
 
-                # source = list(sample[0])
-                pad = [0] * (SEQ_LEN - len(idlist))
-                idlist = [idlist + pad]
-
-                # with open('D:/model/result_rank.txt', 'w', encoding='UTF8') as f:
-
-                feed_dict = {model.inputs: idlist,
-                            model.inputs_length: [1],
-                            model.targets: [0],
-                            model.dropout_keep_prob: 1.0}
-
-                idlist_probability = sess.run(tf.nn.softmax(model.logits), feed_dict=feed_dict)
-                probabilities.append(idlist_probability)
-
-                del model
-                gc.collect()
-
-            all_predictions = int(np.argmax(probabilities))
-            print(all_predictions)
-            if version == "homecare":
-                info = detect_intent_texts('socialrobot-hyu-xdtlug', 'hyusocialdmgenerator', [data], 'ko')  # homecare ko
-            else:
-                info = detect_intent_texts('socialrobot-hyu-reception-nyla', 'hyusocialintent', [data], 'ko')  # reception ko
-            # print("intent: ", all_predictions, ' type: ', type(all_predictions))
-
-            final = make_response_json(all_predictions, data, info)
-            info = None
-
-            # ROS  
-            task_completion_pub.publish(json.dumps(final, ensure_ascii=False, indent=4))
-
-            print('*'*100)
-            print(final)
-            print("="*100)
-
-
-def run_subscriber():
-    global task_completion_pub
-    rospy.init_node('HYU_DM_Intention_Classification')
-    task_completion_pub = rospy.Publisher('/dialog_intent', String, queue_size=10)
-    rospy.Subscriber('/recognitionResult', String, ros_callback_fn)
-
-    rospy.spin()
-
-
-if __name__ == '__main__':
-    run_subscriber()
+        del model
+        gc.collect()
+    print(probabilities)
+    print(np.max(probabilities))
+    print(np.argmax(probabilities))
+    all_predictions = int(np.argmax(probabilities))
+    print('result! : ', all_predictions)
+    if version == "homecare":
+        info = detect_intent_texts('socialrobot-hyu-xdtlug', 'hyusocialdmgenerator', [data], 'ko')  # homecare ko
+    else:
+        info = detect_intent_texts('socialrobot-hyu-reception-nyla', 'hyusocialintent', [data], 'ko')  # reception ko
+    # print("intent: ", all_predictions, ' type: ', type(all_predictions))
