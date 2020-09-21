@@ -43,25 +43,26 @@ $ sudo apt-get install default-jre
 $ sudo apt-get install python3-pyyaml
 
 $ cd dm_intent
-$ sudo pip3 install -r requirements.txt
+$ sudo pip3 install -r requirements.txt  
 ```
 
 **download files**
 
-Go to [Author's Google drive](https://drive.google.com/file/d/1397UDfHetBVBrTLzASouVDaJfdhFgxvp/view?usp=sharing) and download the trained model, data, and auth-key. 
+Go to [Author's Google drive](https://drive.google.com/file/d/1stW5bVJajf_Nv_TLRN8l80qyxvjCRrix/view?usp=sharing) and download the trained model, data, and auth-key. 
 
 ```
 dm_intent 
 	ㄴscripts  
 		ㄴauthkey
-		ㄴbirnn_GRU_0.001_192_ENSEMBLE9
+		ㄴcheckpoints
 		ㄴdata
 ```
 
 ### 5.2 Start the module
 
 ```
-$ cd dm_intent/
+$ cd dm_intent/  
+$ source devel/setup.bash  
 $ roslaunch launch/dm_intent.launch
 ```
 
