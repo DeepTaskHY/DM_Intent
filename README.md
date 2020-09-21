@@ -52,9 +52,10 @@ Go to [Author's Google drive](https://drive.google.com/file/d/1397UDfHetBVBrTLzA
 
 ```
 dm_intent 
-	ㄴauthkey
-	ㄴbirnn_GRU_0.001_192_ENSEMBLE9
-	ㄴdata
+	ㄴscript  
+		ㄴauthkey
+		ㄴbirnn_GRU_0.001_192_ENSEMBLE9
+		ㄴdata
 ```
 
 ### 5.2 Start the module
