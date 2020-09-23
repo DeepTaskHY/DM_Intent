@@ -45,7 +45,7 @@ data_path = PACK_PATH + "/scripts/data/data.pkl"
 dir_path = os.path.dirname(os.path.abspath( __file__ ))
 
 models = os.listdir(PACK_PATH + '/scripts/checkpoints/')
-model_path = dir_path + '/checkpoints/best_val'
+model_path = dir_path + '/checkpoints'
 model_checkpoint_path = model_path + '/model.ckpt-25'
 
 max_len, id2word, word2id, trainingSamples_list, validSamples, testSamples = load_data(data_path)
@@ -139,7 +139,7 @@ def ros_callback_fn(msg):
         ros_input = json.loads(msg.data, encoding='utf-8')
         #print(ros_input)
 
-        if "dialog" == ros_input['header']['target'][0]:
+        if "dialog" in ros_input['header']['target']:
             print(" Input ", ros_input)
 
             name = ros_input['human_speech']['name']

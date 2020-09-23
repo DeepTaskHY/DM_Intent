@@ -1,6 +1,6 @@
 <launch>
 
-	<node name="HYU_DM_Intention_Classification" pkg="dm_intent" type="DMIntent.py">
+	<node name="HYU_DM_Intention_Classification" pkg="dm_intent" type="DMIntent.py" output="screen">
 	
 	</node>
 
