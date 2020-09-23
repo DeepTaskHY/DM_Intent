@@ -95,17 +95,17 @@ $ roslaunch launch/dm_intent.launch
 
 ```
 {
-    'header': {
-        'target': ['planning'], 
-        'content': ['dialog_intent'], 
-        'timestamp': '1563980561.940629720', 
-        'source': 'dialog'
+    "header": {
+        "target": ["planning"], 
+        "content": ["dialog_intent"], 
+        "timestamp": "1563980561.940629720", 
+        "source": "dialog"
     }, 
-    'dialog_intent': {
-        'speech': '좋아진 것 같아.', 
-        'intent': '단순 정보 전달', 
-        'name': '이병현',
-        'information': {}
+    "dialog_intent": {
+        "speech": "좋아진 것 같아.", 
+        "intent": "단순 정보 전달", 
+        "name": "이병현",
+        "information": {}
     }
 }
 ```
