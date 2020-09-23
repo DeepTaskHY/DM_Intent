@@ -22,9 +22,15 @@ import sys
 print(sys.executable)
 import rospkg
 
-version = "reception"  # set homecare / reception
+'''
+    Social Robot HYU
+    DM (Intent Classification) model
+    with Adaboost, ROS ver - 200921
+'''
+# set homecare / reception
+version = "homecare"
+
 PACK_PATH = rospkg.RosPack().get_path("dm_intent")
-print('pack_path: ', PACK_PATH)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 AUTH_KEY_HOMECARE_PATH = PACK_PATH + "/scripts/authkey/homcare.json"
@@ -36,17 +42,11 @@ else:
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = AUTH_KEY_RECEPTION_PATH
 
 data_path = PACK_PATH + "/scripts/data/data.pkl"
-dir_path = os.path.dirname(os.path.abspath(__file__))
-print('dir_path: ', dir_path)
-models = os.listdir(PACK_PATH + '/scripts/checkpoints/')
-model_path = dir_path + '/checkpoints'
-model_checkpoint_path = model_path + '/model.ckpt-25'
+dir_path = os.path.dirname(os.path.abspath( __file__ ))
 
-'''
-    Social Robot HYU
-    DM (Intent Classification) model
-    with Adaboost, ROS ver
-'''
+models = os.listdir(PACK_PATH + '/scripts/checkpoints/')
+model_path = dir_path + '/checkpoints/best_val'
+model_checkpoint_path = model_path + '/model.ckpt-25'
 
 max_len, id2word, word2id, trainingSamples_list, validSamples, testSamples = load_data(data_path)
 
@@ -132,53 +132,81 @@ INDEX_BACK = VOCABULARY_SIZE - INDEX_FRONT
 RNN_CELL = 'GRU'
 MODEL = 'birnn'
 
-while (True):
 
-    # input test
-    data = input('input text...')
+def ros_callback_fn(msg):
+    if msg.data != '':
+        # convert ros message to json
+        ros_input = json.loads(msg.data, encoding='utf-8')
+        #print(ros_input)
 
-    AdaboostInfoLocation = './data/AdaboostInfo.pkl'
-    config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
+        if "dialog" == ros_input['header']['target'][0]:
+            print(" Input ", ros_input)
 
-    probabilities = []
-    model = models.__getitem__(0)
-    print('model_path: ', model)
-    tf.reset_default_graph()
-    with tf.Session(config=config) as sess:
-        model = Model(rnn_size=RNN_SIZE, vocabulary_size=VOCABULARY_SIZE, sequence_len=SEQ_LEN,
-                      embedding_size=EMBEDDING_SIZE, attention_size=ATTENTION_SIZE, learning_rate=LEARNING_RATE,
-                      l2_reg_lambda=L2_LEG_LAMBDA, n_label=N_LABEL, index_front=INDEX_FRONT, index_back=INDEX_BACK,
-                      rnn_cell=RNN_CELL)
-        # ckpt = tf.train.get_checkpoint_state(model_path)
-        if tf.train.checkpoint_exists(model_checkpoint_path):
-            model.saver.restore(sess, model_checkpoint_path)
-        else:
-            raise ValueError('No such file:[{}]'.format(model_path))
+            name = ros_input['human_speech']['name']
+            human_speech = ros_input['human_speech']['speech']
 
-        idlist, sentence_length = make_embedding_from_input(data, word2id)
+            # input test
+            data = human_speech
 
-        # source = list(sample[0])
-        pad = [0] * (SEQ_LEN - len(idlist))
-        idlist = [idlist + pad]
+            AdaboostInfoLocation = './data/AdaboostInfo.pkl'
+            config = tf.ConfigProto()
+            config.gpu_options.allow_growth = True
 
-        feed_dict = {model.inputs: idlist,
-                     model.inputs_length: [1],
-                     model.targets: [0],
-                     model.dropout_keep_prob: 1.0}
+            probabilities = []
+            model = models.__getitem__(0)
+            tf.reset_default_graph()
+            with tf.Session(config=config) as sess:
+                model = Model(rnn_size=RNN_SIZE, vocabulary_size=VOCABULARY_SIZE, sequence_len=SEQ_LEN, embedding_size=EMBEDDING_SIZE, attention_size=ATTENTION_SIZE, learning_rate=LEARNING_RATE, l2_reg_lambda=L2_LEG_LAMBDA, n_label=N_LABEL, index_front=INDEX_FRONT, index_back=INDEX_BACK, rnn_cell=RNN_CELL)
+                if tf.train.checkpoint_exists(model_checkpoint_path):
+                    model.saver.restore(sess, model_checkpoint_path)
+                else:
+                    raise ValueError('No such file:[{}]'.format(model_path))
+                # ckpt = tf.train.get_checkpoint_state(model_path)
+                # if ckpt and tf.train.checkpoint_exists(ckpt.model_checkpoint_path):
+                #     model.saver.restore(sess, ckpt.model_checkpoint_path)
 
-        idlist_probability = sess.run(tf.nn.softmax(model.logits), feed_dict=feed_dict)
-        probabilities.append(idlist_probability)
+                idlist, sentence_length = make_embedding_from_input(data, word2id)
 
-        del model
-        gc.collect()
-    print(probabilities)
-    print(np.max(probabilities))
-    print(np.argmax(probabilities))
-    all_predictions = int(np.argmax(probabilities))
-    print('result! : ', all_predictions)
-    if version == "homecare":
-        info = detect_intent_texts('socialrobot-hyu-xdtlug', 'hyusocialdmgenerator', [data], 'ko')  # homecare ko
-    else:
-        info = detect_intent_texts('socialrobot-hyu-reception-nyla', 'hyusocialintent', [data], 'ko')  # reception ko
-    # print("intent: ", all_predictions, ' type: ', type(all_predictions))
+                pad = [0] * (SEQ_LEN - len(idlist))
+                idlist = [idlist + pad]
+
+                feed_dict = {model.inputs: idlist,
+                            model.inputs_length: [1],
+                            model.targets: [0],
+                            model.dropout_keep_prob: 1.0}
+
+                idlist_probability = sess.run(tf.nn.softmax(model.logits), feed_dict=feed_dict)
+                probabilities.append(idlist_probability)
+
+                del model
+                gc.collect()
+
+            all_predictions = int(np.argmax(probabilities))
+            print(all_predictions)
+            if version == "homecare":
+                info = detect_intent_texts('socialrobot-hyu-xdtlug', 'hyusocialdmgenerator', [data], 'ko')  # homecare ko
+            else:
+                info = detect_intent_texts('socialrobot-hyu-reception-nyla', 'hyusocialintent', [data], 'ko')  # reception ko
+            # print("intent: ", all_predictions, ' type: ', type(all_predictions))
+
+            final = make_response_json(all_predictions, data, info)
+            info = None
+
+            # ROS
+            task_completion_pub.publish(json.dumps(final, ensure_ascii=False, indent=4))
+
+            print('*'*100)
+            print(final)
+            print("="*100)
+
+
+def run_subscriber():
+    global task_completion_pub
+    rospy.init_node('HYU_DM_Intention_Classification')
+    task_completion_pub = rospy.Publisher('/dialog_intent', String, queue_size=10)
+    rospy.Subscriber('/recognitionResult', String, ros_callback_fn)
+
+    rospy.spin()
+
+if __name__ == '__main__':
+    run_subscriber()
