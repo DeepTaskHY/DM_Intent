@@ -48,14 +48,9 @@ $ sudo pip3 install -r requirements.txt
 
 **download files**
 
-Go to [Author's Google drive](https://drive.google.com/file/d/1stW5bVJajf_Nv_TLRN8l80qyxvjCRrix/view?usp=sharing) and download the trained model, data, and auth-key. 
-
 ```
-dm_intent 
-	ㄴscripts  
-		ㄴauthkey
-		ㄴcheckpoints
-		ㄴdata
+$ cd dm_intent  
+$ sh model_download.sh  
 ```
 
 ### 5.2 Start the module
@@ -70,20 +65,15 @@ $ roslaunch launch/dm_intent.launch
 
 ```
 {  
-   "header":{  
-      "content":["dialog_intent"],
-      "source":"dialog",
-      "target":["planning"],
-      "timestamp":"1544471289.409"
+   "header": {
+        "source": "perception",
+        "target": ["dialog", "planning"],
+        "timestamp": "1563980552.933543682",
+        "content": ["human_speech"]
    },
-   "dialog_intent":{ 
+   "human_speech":{ 
       "speech":"안녕하세요",
       "name":"이병현",
-      "information":{  
-         "key1":"value1",
-         "key2":"value2",
-         "key3":"value3"
-      }
    }
 }
 ```
@@ -114,8 +104,8 @@ $ roslaunch launch/dm_intent.launch
     'dialog_intent': {
         'speech': '좋아진 것 같아.', 
         'intent': '단순 정보 전달', 
-        'disease_status': 'positive', 
-        'name': '이병현'
+        'name': '이병현',
+        'information': {}
     }
 }
 ```
