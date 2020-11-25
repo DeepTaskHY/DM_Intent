@@ -14,7 +14,7 @@ Intention Classifier is a module that analyzes the intention of the user’s utt
 
 To analyze the intention of the user's utterance, this module consists of two parts: 1)keyword extraction, 2)intention analysis. To extract the keywords of the user's utterance, we used Google Dialogflow. This module combines “bi-RNN” and “Attention mechanism” to implement an Intention classification model.  
 
-![KCC2020-Att-BiRNN](/Users/kimyuri/Downloads/KCC2020-Att-BiRNN.jpg)
+![KCC2020-Att-BiRNN](./image/KCC2020-Att-BiRNN.jpg)
 
 ## 4. Hardware requirements
 
