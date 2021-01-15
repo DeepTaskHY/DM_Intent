@@ -33,11 +33,21 @@ $ sudo apt-get update
 $ sudo apt-get install ros-melodic-desktop-full  
 $ sudo rosdep init  
 $ rosdep update  
+
+# or download dockerimage
+$ docker pull ribin7bok/deeptask
+$ docker run -e NVIDIA_VISIBLE_DEVICES=0 --volume ~/$workspace_name:/workspace -it --name social_intent ribin7bok/deeptask
+
 ```
 
 **requirements**
 
 ```
+$ mkdir $dir_name
+$ cd $dir_name
+$ mkdir src
+$ catkin_make
+$ cd src
 $ git clone --recursive https://github.com/DeepTaskHY/DM_Intent.git
 $ sudo apt-get update && sudo apt-get install python3-pip 
 $ sudo apt-get install default-jdk
@@ -58,9 +68,9 @@ $ sh model_download.sh
 ### 5.2 Start the module
 
 ```
-$ cd dm_intent/  
+$ cd $dir_name
 $ source devel/setup.bash  
-$ roslaunch launch/dm_intent.launch
+$ roslaunch src/DM_Intent/dm_intent/launch/dm_intent.launch
 ```
 
 ## 6. Input/Subscribed Topics
